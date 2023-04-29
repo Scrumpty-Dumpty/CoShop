@@ -2,7 +2,7 @@
 //password:Mpif7U7Udsc9oKz2
 const express = require("express");
 const app = express();
-
+const bcrypt = require('bcryptjs');
 app.use(express.static(__dirname + '/client'))
 
 // Start MongoDB Atlas ********
@@ -34,15 +34,20 @@ const userSchema = ({
 const User = mongoose.model("user", userSchema);
 
 // Create route called from register.html
-app.post("/register", function(req, res){
-	let newNote = new User({
-		name: req.body.name,
-		email: req.body.email,
-    	password: req.body.pass1
-	})
-	
+app.post("/register", async(req, res) => {
+    try {
+        const hashedPassword = await bcrypt.hash(req.body.pass1, 10);
+	    let newNote = new User({
+		    name: req.body.name,
+		    email: req.body.email,
+    	    password: hashedPassword
+	    })
+
 	newNote.save();
 	res.redirect("/");
+} catch (err) {
+    console.log(err);
+}
 })
 
 const renderNotes = (notesArray) => {
