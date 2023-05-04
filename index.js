@@ -31,7 +31,7 @@ const userSchema = ({
 	}
 	// figure out how to work around there being no image schema type 
   });
-const User = mongoose.model("user", userSchema);
+const User = mongoose.model("users", userSchema);
 
 // Create route called from register.html
 app.post("/register", async(req, res) => {
@@ -44,11 +44,38 @@ app.post("/register", async(req, res) => {
 	    })
 
 	newNote.save();
+	// line below commented out until login works 100% of the time
+	//res.redirect("/pages/login.html");
 	res.redirect("/");
 } catch (err) {
     console.log(err);
 }
 })
+
+// Create route called from login.html
+// note: login does not work 100% of the time - needs to be debugged
+app.post("/login", async (req, res) => {
+    try {
+        const user = await User.findOne({email: req.body.email});  
+      if (!user) {
+        res.status(401).send("Incorrect email or password:" + req.body.email + " " + req.body.password);
+        return;
+      }
+  
+      const isPasswordMatch = await bcrypt.compare(req.body.password, user.password);
+  
+      if (!isPasswordMatch) {
+        res.status(401).send("Incorrect email or password");
+        return;
+      }  
+     
+      res.redirect("/");
+
+    } catch (err) {
+      console.log(err);
+    }
+  });
+
 
 const renderNotes = (notesArray) => {
 	let text = "Users Collection:\n\n";
