@@ -23,8 +23,7 @@
     "dev": "concurrently \"tailwindcss -i ./client/assets/styles/input.css -o ./client/assets/styles/output.css --watch\" \"nodemon index.js\"",
     "prod": "tailwindcss -i ./client/assets/styles/input.css -o ./client/assets/styles/output.css --minify",
     "start": "nodemon index.js",
-    "format-check": "npx prettier --check .",
-    "format-write": "npx prettier --write ."
+    "format": "npx prettier --write ."
   },
   "repository": {
     "type": "git",

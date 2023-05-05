@@ -1,81 +1,102 @@
-let list = document.querySelector("#myUL");
-let items = [];
+const itemForm = document.querySelector("#itemForm");
+const formInput = document.querySelector("#formInput");
 
-function Item(name, quantity, location) {
-  this.name = name;
-  this.quantity = quantity;
-  this.location = location;
+// const totalCount = document.querySelector("#totalCount");
+// const boughtCount = document.querySelector("#boughtCount");
+// const remainingCount = document.querySelector("#remainingCount");
+
+let list = document.querySelector("ul");
+let items = JSON.parse(localStorage.getItem("items")) || [];
+
+// create items from localStorage on page load
+if (localStorage.getItem("items")) {
+  items.map((item) => {
+    createItem(item);
+  });
 }
 
-function addItem() {
-  // create new element
-  let newItem = document.createElement("li");
-  newItem.innerHTML = `
+itemForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  const inputValue = formInput.value;
+
+  if (inputValue == "") {
+    return;
+  }
+
+  const item = {
+    id: new Date().getTime(), // creates a unique id for each item
+    name: inputValue,
+    quantity: 1,
+    isBought: false,
+  };
+
+  items.push(item);
+  localStorage.setItem("items", JSON.stringify(items));
+
+  createItem(item);
+
+  itemForm.reset();
+  formInput.focus();
+});
+
+// remove item if user clicks on the x
+list.addEventListener("click", (e) => {
+  if (e.target.classList.contains("fa-x")) {
+    const itemId = e.target.closest("li").id;
+    removeItem(itemId);
+  }
+});
+
+// list.addEventListener("input", (e) => {
+//   const itemId = e.target.closest("li").id;
+//   updateItem(itemId, e.target);
+// });
+
+function createItem(item) {
+  const itemEl = document.createElement("li");
+  itemEl.setAttribute("id", item.id);
+  itemEl.innerHTML = `
   <div
-    class="flex items-center justify-between border-b border-gray-400 p-2"
+    class="flex items-center justify-between rounded-md bg-gray-800 p-4"
   >
-    <div class="flex items-center gap-4">
+    <div class="flex items-center gap-2">
       <input type="checkbox" />
       <input
-        id="itemName"
         type="text"
-        class="w-min bg-transparent text-xl outline-none"
-        placeholder="Add item name..."
+        class="bg-transparent text-lg outline-none"
+        value="${item.name}"
       />
     </div>
-    <div class="flex items-center gap-4">
-      <label for="quantity"><i class="fa-solid fa-hashtag text-gray-600"></i></label>
-      <input id="itemQuantity" name="quantity" type="number" class="bg-transparent w-14" value="1" min="1" max="999">
-
-      <select id="itemStore" class="bg-transparent p-2 text-gray-600">
-        <option selected>Location</option>
-      </select>
-      <img src="../assets/images/man-1.png" class="h-10" />
-      <!-- <button
-        onclick="document.getElementById('editWindow').classList.toggle('hidden');"
-      >
-        <i class="fa-solid fa-pen-to-square"></i>
-      </button> -->
-      <button id="itemDelete">
-        <i class="fa-solid fa-trash-can text-red-700"></i>
-      </button>
-
-      <!-- test button -->
-      <button onclick="console.log(items);">
-        <i class="fa-solid fa-circle-info text-blue-700"></i>
-      </button>
-
-    </div>
+    <button>
+      <i class="fa-solid fa-x text-red-700"></i>
+    </button>
   </div>
   `;
-  list.appendChild(newItem);
-
-  // create a new item
-  let blankItem = items.push(new Item());
-
-  // pull values on change with event listener
-  let itemName = document.querySelector("#itemName");
-  let itemQuantity = document.querySelector("#itemQuantity");
-  let itemDelete = document.querySelector("#itemDelete");
-
-  itemName.addEventListener("change", () => {
-    blankItem.name = itemName.value;
-    console.log(items);
-  });
-
-  itemQuantity.addEventListener("change", () => {
-    blankItem.quantity = itemQuantity.value;
-    console.log(items);
-  });
-
-  itemDelete.addEventListener("click", () => {
-    newItem.remove();
-    items.pop(blankItem);
-    console.log(items.length);
-  });
+  list.appendChild(itemEl);
+  // countItems();
 }
 
-// create template item on load
-addItem();
+function removeItem(itemId) {
+  items = items.filter((item) => item.id != parseInt(itemId));
+  // updates localStorage
+  localStorage.setItem("items", JSON.stringify(items));
+  // update DOM elements
+  document.getElementById(itemId).remove();
+  // countItems();
+}
 
-// TODO: set unique ids to be able to change parameters
+function countItems() {
+  const boughtItemsArray = items.filter((item) => item.isBought == true);
+
+  totalCount.textContent = items.lenght;
+  boughtCount.textContent = boughtItemsArray.lenght;
+  remainingCount.textContent = items.lenght - boughtItemsArray.lenght;
+}
+
+// function updateItem(itemId, el) {
+//   const item = items.find((item) => itemId == parseInt(itemId));
+//   if (el.value != item.name) {
+//     el.value == item.name;
+//   }
+// }
